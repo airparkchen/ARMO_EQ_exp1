@@ -1,0 +1,7 @@
+round,order,genre,music_type,file_path
+1,1,爵士,原始,/home/parker6/Documents/project 02 ARMO/armo_eq_exp1/music/jazz/jazz_OM_mixed.wav
+1,2,爵士,EQ調整,/home/parker6/Documents/project 02 ARMO/armo_eq_exp1/music/jazz/jazz_EQ_mixed_harmanHFM_safe.wav
+2,1,流行,EQ調整,/home/parker6/Documents/project 02 ARMO/armo_eq_exp1/music/pop/pop_EQ_harmanHFM_safe.wav
+2,2,流行,原始,/home/parker6/Documents/project 02 ARMO/armo_eq_exp1/music/pop/pop_OM.wav
+3,1,古典,原始,/home/parker6/Documents/project 02 ARMO/armo_eq_exp1/music/classical/classical_OM.wav
+3,2,古典,EQ調整,/home/parker6/Documents/project 02 ARMO/armo_eq_exp1/music/classical/classical_EQ_harmnaHFM_safe.wav

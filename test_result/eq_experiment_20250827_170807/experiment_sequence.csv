@@ -1,0 +1,7 @@
+round,order,genre,music_type,file_path
+1,1,古典,EQ調整,./music/classical/classical_EQ_defaultEQ.wav
+1,2,古典,原始,./music/classical/classical_OM.wav
+2,1,流行,EQ調整,./music/pop/pop_EQ_defaultEQ.wav
+2,2,流行,原始,./music/pop/pop_OM.wav
+3,1,爵士,EQ調整,./music/jazz/jazz_EQ_defaultEQ.wav
+3,2,爵士,原始,./music/jazz/jazz_OM.wav
