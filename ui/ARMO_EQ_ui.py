@@ -6,6 +6,7 @@ from datetime import datetime
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Dict, Optional
+from ui.PostQuestionnairePage import PostQuestionnairePage
 
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
@@ -123,6 +124,78 @@ class MusicSequenceGenerator:
         #（因為我們先按 ext_priority 蒐集，若修改時間相近，wav 通常會先進來）
         best = max(candidates, key=lambda p: p.stat().st_mtime)
 
+        return str(best)
+    
+    def get_post_music_paths(self, genre: MusicGenre, round_music_sequence: List[MusicInfo]) -> tuple:
+        """
+        獲取後測問卷的音樂路徑
+        
+        Args:
+            genre: 音樂類型
+            round_music_sequence: 該輪的音樂序列（用來確定A/B段對應關係）
+            
+        Returns:
+            tuple: (music_a_path, music_b_path)
+        """
+        genre_map = {
+            MusicGenre.CLASSICAL: "classical",
+            MusicGenre.POP: "pop",
+            MusicGenre.JAZZ: "jazz"
+        }
+        folder = genre_map[genre]
+        base_dir = Path(self.config.music_base_path).expanduser().resolve() / folder
+        
+        # 根據該輪的音樂序列確定A段和B段
+        music_a_type = None  # 第一首音樂的類型
+        music_b_type = None  # 第二首音樂的類型
+        
+        for music in round_music_sequence:
+            if music.genre == genre:
+                if music.order_in_round == 1:
+                    music_a_type = music.music_type
+                elif music.order_in_round == 2:
+                    music_b_type = music.music_type
+        
+        # 查找後測音檔
+        music_a_path = self._find_post_music_file(base_dir, folder, music_a_type)
+        music_b_path = self._find_post_music_file(base_dir, folder, music_b_type)
+        
+        return music_a_path, music_b_path
+    
+    def _find_post_music_file(self, base_dir: Path, folder: str, music_type: MusicType) -> Optional[str]:
+        """
+        查找後測音樂檔案
+        
+        檔名格式：classical_EQ_post_*.* 或 classical_OM_post_*.*
+        """
+        if music_type is None:
+            return None
+        
+        # 確定前綴
+        if music_type == MusicType.ORIGINAL:
+            prefix = f"{folder}_OM_post"
+        elif music_type == MusicType.EQ_ENHANCED:
+            prefix = f"{folder}_EQ_post"
+        else:
+            return None
+        
+        # 副檔名優先順序
+        ext_priority = [".wav", ".mp3", ".flac"]
+        
+        candidates = []
+        for ext in ext_priority:
+            # 尋找符合格式的檔案：prefix.ext 或 prefix_*.ext
+            candidates += list(base_dir.glob(f"{prefix}{ext}"))
+            candidates += list(base_dir.glob(f"{prefix}_*{ext}"))
+        
+        if not candidates:
+            print(f"[WARNING] 找不到後測音檔：{base_dir}/{prefix}*")
+            return None
+        
+        # 選擇最新的檔案
+        best = max(candidates, key=lambda p: p.stat().st_mtime)
+        print(f"[DEBUG] 找到後測音檔：{best}")
+        
         return str(best)
 
 class DataManager:
@@ -331,17 +404,51 @@ class SimpleQuestionnairePage(QWidget):
         question = self.questions[self.current_index]
         self.question_label.setText(question["question"])
         
+        # 創建選項容器 - 整體居中，內容左對齊
+        options_container = QWidget()
+        options_container.setFixedWidth(500)  # 稍微窄一點適合一般問卷
+        container_layout = QVBoxLayout(options_container)
+        container_layout.setAlignment(Qt.AlignLeft)  # 選項內容左對齊
+        container_layout.setSpacing(12)  # 選項間距
+        container_layout.setContentsMargins(0, 10, 0, 10)
+        
         # 創建選項
         self.button_group = QButtonGroup(self)
         for option in question["options"]:
             radio = QRadioButton(option)
             radio.setFont(QFont("Arial", 20))
+            radio.setStyleSheet("""
+                QRadioButton {
+                    spacing: 10px;
+                    padding: 8px;
+                }
+                QRadioButton::indicator {
+                    width: 20px;
+                    height: 20px;
+                }
+                QRadioButton::indicator:unchecked {
+                    border: 2px solid #7f8c8d;
+                    border-radius: 10px;
+                    background-color: white;
+                }
+                QRadioButton::indicator:checked {
+                    border: 2px solid #3498db;
+                    border-radius: 10px;
+                    background-color: #3498db;
+                }
+            """)
+            
             self.button_group.addButton(radio)
-            self.options_layout.addWidget(radio)
+            container_layout.addWidget(radio)
+        
+        # 將整個選項容器居中放置
+        self.options_layout.setAlignment(Qt.AlignCenter)
+        self.options_layout.addWidget(options_container)
         
         # 更新按鈕狀態
         self.prev_button.setEnabled(self.current_index > 0)
         self.next_button.setText("完成" if self.current_index == len(self.questions) - 1 else "下一題")
+
     
     def prev_question(self):
         if self.current_index > 0:
@@ -532,13 +639,42 @@ class EQMusicExperimentWindow(QMainWindow):
             self.show_post_questionnaire()  # 進入後測
     
     def show_post_questionnaire(self):
+        """顯示後測問卷 - 支援音樂回放"""
         questions = self.questionnaire_loader.load_questionnaire("post_questionnaire.json")
         
-        questionnaire = SimpleQuestionnairePage(
-            questions=questions,
-            title=f"後測問卷 (第{self.current_round}輪)",
-            next_callback=self.on_post_questionnaire_complete
-        )
+        # 獲取該輪的音樂序列和類型
+        current_round_music = [
+            music for music in self.music_sequence 
+            if music.round_number == self.current_round
+        ]
+        
+        if current_round_music:
+            # 獲取該輪的音樂類型
+            genre = current_round_music[0].genre
+            
+            # 獲取後測音樂路徑
+            music_a_path, music_b_path = self.sequence_generator.get_post_music_paths(
+                genre, current_round_music
+            )
+            
+            # 創建支援音樂回放的後測問卷頁面
+            questionnaire = PostQuestionnairePage(
+                questions=questions,
+                title=f"後測問卷 (第{self.current_round}輪)",
+                next_callback=self.on_post_questionnaire_complete,
+                music_a_path=music_a_path,
+                music_b_path=music_b_path,
+                debug_mode=self.debug_mode
+            )
+        else:
+            # 如果沒有找到音樂序列，使用原始簡單問卷頁面
+            from ui.SimpleQuestionnairePage import SimpleQuestionnairePage  # 需要將原來的問卷頁面移到獨立檔案
+            questionnaire = SimpleQuestionnairePage(
+                questions=questions,
+                title=f"後測問卷 (第{self.current_round}輪)",
+                next_callback=self.on_post_questionnaire_complete
+            )
+        
         self.setCentralWidget(questionnaire)
     
     def on_post_questionnaire_complete(self, results):

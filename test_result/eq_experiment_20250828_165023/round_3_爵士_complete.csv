@@ -1,0 +1,15 @@
+round,phase,question_id,question,answer,score,music_type,music_order,music_file,timestamp
+3,pre_questionnaire,q1,請描述您目前的心情狀態,普通中性,3,,,,20250828_165444
+3,music_evaluation,q1,您覺得這段音樂的喜好程度如何？,3 - 普通,3,原始,1,jazz_OM_post_mixed_Flat_AVEN.wav,20250828_165444
+3,music_evaluation,q2,聆聽這段音樂時，您感到多放鬆？,3 - 普通,3,原始,1,jazz_OM_post_mixed_Flat_AVEN.wav,20250828_165444
+3,music_evaluation,q3,您覺得這段音樂的音量（響度）如何？,3 - 剛剛好,3,原始,1,jazz_OM_post_mixed_Flat_AVEN.wav,20250828_165444
+3,music_evaluation,q4,您之前是否聽過這首音樂？,是，聽過,1,原始,1,jazz_OM_post_mixed_Flat_AVEN.wav,20250828_165444
+3,music_evaluation,q5,聆聽這段音樂時，您的專注程度如何？,3 - 普通,3,原始,1,jazz_OM_post_mixed_Flat_AVEN.wav,20250828_165444
+3,music_evaluation,q1,您覺得這段音樂的喜好程度如何？,3 - 普通,3,EQ調整,2,jazz_EQ_mixed_harman+HFM_AVEN.wav,20250828_165444
+3,music_evaluation,q2,聆聽這段音樂時，您感到多放鬆？,3 - 普通,3,EQ調整,2,jazz_EQ_mixed_harman+HFM_AVEN.wav,20250828_165444
+3,music_evaluation,q3,您覺得這段音樂的音量（響度）如何？,3 - 剛剛好,3,EQ調整,2,jazz_EQ_mixed_harman+HFM_AVEN.wav,20250828_165444
+3,music_evaluation,q4,您之前是否聽過這首音樂？,是，聽過,1,EQ調整,2,jazz_EQ_mixed_harman+HFM_AVEN.wav,20250828_165444
+3,music_evaluation,q5,聆聽這段音樂時，您的專注程度如何？,3 - 普通,3,EQ調整,2,jazz_EQ_mixed_harman+HFM_AVEN.wav,20250828_165444
+3,post_questionnaire,q1,整體而言，您比較喜歡哪一段？,偏好 B 段音樂,3,,,,20250828_165444
+3,post_questionnaire,q2,在放鬆效果上，您覺得哪一段音樂更能讓您感到放鬆？,B 段音樂比較放鬆,3,,,,20250828_165444
+3,post_questionnaire,q3,您覺得這兩段音樂聽起來有明顯差異嗎？,有非常明顯的差異,1,,,,20250828_165444

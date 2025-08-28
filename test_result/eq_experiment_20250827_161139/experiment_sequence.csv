@@ -1,7 +1,0 @@
-round,order,genre,music_type,file_path
-1,1,流行,原始,./music/pop/pop_original.mp3
-1,2,流行,EQ調整,./music/pop/pop_eq_enhanced.mp3
-2,1,爵士,EQ調整,./music/jazz/jazz_eq_enhanced.mp3
-2,2,爵士,原始,./music/jazz/jazz_original.mp3
-3,1,古典,原始,./music/classical/classical_original.mp3
-3,2,古典,EQ調整,./music/classical/classical_eq_enhanced.mp3

@@ -1,0 +1,7 @@
+round,order,genre,music_type,file_path
+1,1,流行,原始,/home/parker6/Documents/project 02 ARMO/armo_eq_exp1/music/pop/pop_OM_Flat_AVEN.wav
+1,2,流行,EQ調整,/home/parker6/Documents/project 02 ARMO/armo_eq_exp1/music/pop/pop_EQ_harman+HFM_AVEN.wav
+2,1,爵士,原始,/home/parker6/Documents/project 02 ARMO/armo_eq_exp1/music/jazz/jazz_OM_post_mixed_Flat_AVEN.wav
+2,2,爵士,EQ調整,/home/parker6/Documents/project 02 ARMO/armo_eq_exp1/music/jazz/jazz_EQ_mixed_harman+HFM_AVEN.wav
+3,1,古典,EQ調整,/home/parker6/Documents/project 02 ARMO/armo_eq_exp1/music/classical/classical_EQ_post_harmna+HFM_AVEN.wav
+3,2,古典,原始,/home/parker6/Documents/project 02 ARMO/armo_eq_exp1/music/classical/classical_OM_post_Flat_AVEN.wav
