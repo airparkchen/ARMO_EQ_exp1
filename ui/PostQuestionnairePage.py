@@ -102,19 +102,19 @@ class PostQuestionnairePage(QWidget):
         music_layout = QVBoxLayout(music_frame)
         
         # 標題
-        music_title = QLabel("🎵 音樂回放區域")
+        music_title = QLabel("🎵 需重新聆聽音樂片段來協助回答，請點擊下方按鈕：")
         music_title.setFont(QFont("Arial", 20, QFont.Bold))
         music_title.setAlignment(Qt.AlignCenter)
         music_title.setStyleSheet("color: #2c3e50; margin: 8px;")
         music_layout.addWidget(music_title)
         
-        # 說明文字
-        instruction = QLabel("如需重新聆聽音樂片段來協助回答，請點擊下方按鈕：")
-        instruction.setFont(QFont("Arial", 16))
-        instruction.setAlignment(Qt.AlignCenter)
-        instruction.setWordWrap(True)
-        instruction.setStyleSheet("color: #34495e; margin: 5px;")
-        music_layout.addWidget(instruction)
+        # # 說明文字
+        # instruction = QLabel("如需重新聆聽音樂片段來協助回答，請點擊下方按鈕：")
+        # instruction.setFont(QFont("Arial", 16))
+        # instruction.setAlignment(Qt.AlignCenter)
+        # instruction.setWordWrap(True)
+        # instruction.setStyleSheet("color: #34495e; margin: 5px;")
+        # music_layout.addWidget(instruction)
         
         # 按鈕區域
         button_layout = QHBoxLayout()
@@ -143,6 +143,27 @@ class PostQuestionnairePage(QWidget):
             """)
             self.play_a_button.clicked.connect(self.play_music_a)
             button_layout.addWidget(self.play_a_button)
+        
+        # 停止按鈕 (移到中間位置)
+        self.stop_button = QPushButton("⏹ 停止播放")
+        self.stop_button.setFont(QFont("Arial", 14))
+        self.stop_button.setFixedSize(140, 45)
+        self.stop_button.setStyleSheet("""
+            QPushButton {
+                background-color: #7f8c8d;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #6c7b7d;
+            }
+            QPushButton:pressed {
+                background-color: #5d6d6e;
+            }
+        """)
+        self.stop_button.clicked.connect(self.stop_music)
+        button_layout.addWidget(self.stop_button)
         
         # B段音樂按鈕
         if self.music_b_path:
@@ -174,45 +195,24 @@ class PostQuestionnairePage(QWidget):
         control_layout.setAlignment(Qt.AlignCenter)
         control_layout.setSpacing(30)
         
-        # 停止按鈕
-        self.stop_button = QPushButton("⏹ 停止播放")
-        self.stop_button.setFont(QFont("Arial", 14))
-        self.stop_button.setFixedSize(150, 45)
-        self.stop_button.setStyleSheet("""
-            QPushButton {
-                background-color: #7f8c8d;
-                color: white;
-                border: none;
-                border-radius: 8px;
-            }
-            QPushButton:hover {
-                background-color: #6c7b7d;
-            }
-            QPushButton:pressed {
-                background-color: #5d6d6e;
-            }
-        """)
-        self.stop_button.clicked.connect(self.stop_music)
-        control_layout.addWidget(self.stop_button)
-        
         # 除錯模式跳過按鈕
-        if self.debug_mode:
-            skip_button = QPushButton("⏭ 跳過音樂")
-            skip_button.setFont(QFont("Arial", 14))
-            skip_button.setFixedSize(130, 40)
-            skip_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #ff6666;
-                    color: white;
-                    border: none;
-                    border-radius: 5px;
-                }
-                QPushButton:hover {
-                    background-color: #ff4444;
-                }
-            """)
-            skip_button.clicked.connect(self.stop_music)
-            control_layout.addWidget(skip_button)
+        # if self.debug_mode:
+        #     skip_button = QPushButton("⏭ 跳過音樂")
+        #     skip_button.setFont(QFont("Arial", 14))
+        #     skip_button.setFixedSize(130, 40)
+        #     skip_button.setStyleSheet("""
+        #         QPushButton {
+        #             background-color: #ff6666;
+        #             color: white;
+        #             border: none;
+        #             border-radius: 5px;
+        #         }
+        #         QPushButton:hover {
+        #             background-color: #ff4444;
+        #         }
+        #     """)
+        #     skip_button.clicked.connect(self.stop_music)
+        #     control_layout.addWidget(skip_button)
         
         music_layout.addLayout(control_layout)
         
@@ -225,8 +225,8 @@ class PostQuestionnairePage(QWidget):
             background-color: #ecf0f1;
             border: 1px solid #bdc3c7;
             border-radius: 6px;
-            padding: 8px;
-            margin: 10px;
+            padding: 6px;
+            margin: 8px;
         """)
         music_layout.addWidget(self.status_label)
         
