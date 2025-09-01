@@ -10,7 +10,7 @@ from ui.PostQuestionnairePage import PostQuestionnairePage
 
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
-    QPushButton, QRadioButton, QButtonGroup, QMessageBox
+    QPushButton, QRadioButton, QButtonGroup, QMessageBox, QLineEdit  
 )
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtGui import QFont
@@ -513,6 +513,8 @@ class EQMusicExperimentWindow(QMainWindow):
         # 服務初始化
         self.sequence_generator = MusicSequenceGenerator(self.config)
         self.questionnaire_loader = QuestionnaireLoader(self.config.questionnaire_path)
+        # 參與者資訊
+        self.participant_name = ""
         
         # 創建目錄和數據管理器
         self.case_path = self.create_case_directory()
@@ -522,17 +524,20 @@ class EQMusicExperimentWindow(QMainWindow):
         self.music_sequence = self.sequence_generator.generate_sequence()
         self.data_manager.save_experiment_sequence(self.music_sequence)
         
+
+        
         self.start_experiment()
         
-    
     def create_case_directory(self) -> str:
+        """創建實驗目錄 - 使用姓名+時間"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        case_path = os.path.join(self.config.results_base_path, f"eq_experiment_{timestamp}")
+        case_name = f"{self.participant_name}_{timestamp}"
+        case_path = os.path.join(self.config.results_base_path, case_name)
         os.makedirs(case_path, exist_ok=True)
         return case_path
     
     def start_experiment(self):
-        """開始實驗頁面"""
+        """開始實驗頁面 - 添加簡單姓名輸入"""
         start_widget = QWidget()
         layout = QVBoxLayout(start_widget)
         layout.setAlignment(Qt.AlignCenter)
@@ -552,13 +557,47 @@ class EQMusicExperimentWindow(QMainWindow):
         info.setWordWrap(True)
         layout.addWidget(info)
         
+        # 姓名輸入 - 簡單版本
+        name_label = QLabel("請輸入您的姓名：")
+        name_label.setFont(QFont("Arial", 18))
+        name_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(name_label)
+        
+        self.name_input = QLineEdit()
+        self.name_input.setFont(QFont("Arial", 16))
+        self.name_input.setFixedSize(200, 40)
+        self.name_input.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.name_input, alignment=Qt.AlignCenter)
+        
         start_btn = QPushButton("開始實驗")
         start_btn.setFont(QFont("Arial", 20))
         start_btn.setFixedSize(150, 60)
-        start_btn.clicked.connect(self.start_first_round)
+        start_btn.clicked.connect(self.on_start_button_clicked)
         layout.addWidget(start_btn, alignment=Qt.AlignCenter)
         
         self.setCentralWidget(start_widget)
+
+    def on_start_button_clicked(self):
+        """開始按鈕點擊處理"""
+        name = self.name_input.text().strip()
+        
+        if not name and not self.debug_mode:
+            QMessageBox.warning(self, "提示", "請輸入姓名")
+            return
+        
+        # 設定參與者姓名
+        self.participant_name = name if name else "admin"
+        
+        # 創建實驗目錄
+        self.case_path = self.create_case_directory()
+        self.data_manager = DataManager(self.case_path)
+        
+        # 生成音樂序列
+        self.music_sequence = self.sequence_generator.generate_sequence()
+        self.data_manager.save_experiment_sequence(self.music_sequence)
+        
+        # 開始實驗
+        self.start_first_round()
     
     def start_first_round(self):
         self.current_round = 1
