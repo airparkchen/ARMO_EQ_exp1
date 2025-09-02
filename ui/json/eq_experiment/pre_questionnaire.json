@@ -34,7 +34,8 @@
       "民謠音樂（Folk）",
       "其他"
     ],
-    "first_round_only": true
+    "first_round_only": true,
+    "multi_select" : true
   },
   {
     "question": "請描述您目前的心情狀態",

@@ -9,7 +9,7 @@ from typing import List, Dict, Optional
 from ui.PostQuestionnairePage import PostQuestionnairePage
 
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QCheckBox, 
     QPushButton, QRadioButton, QButtonGroup, QMessageBox, QLineEdit  
 )
 from PySide6.QtCore import Signal, Qt
@@ -360,13 +360,13 @@ class SimpleQuestionnairePage(QWidget):
         
         # 標題
         self.title_label = QLabel(self.title)
-        self.title_label.setFont(QFont("Arial", 28))
+        self.title_label.setFont(QFont("Arial", 22))
         self.title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.title_label)
         
         # 問題
         self.question_label = QLabel()
-        self.question_label.setFont(QFont("Arial", 24))
+        self.question_label.setFont(QFont("Arial", 20))
         self.question_label.setAlignment(Qt.AlignCenter)
         self.question_label.setWordWrap(True)
         layout.addWidget(self.question_label)
@@ -381,13 +381,13 @@ class SimpleQuestionnairePage(QWidget):
         buttons_layout.setSpacing(50)
         
         self.prev_button = QPushButton("上一題")
-        self.prev_button.setFont(QFont("Arial", 20))
+        self.prev_button.setFont(QFont("Arial", 14))
         self.prev_button.setFixedSize(120, 50)
         self.prev_button.clicked.connect(self.prev_question)
         buttons_layout.addWidget(self.prev_button)
         
         self.next_button = QPushButton("下一題")
-        self.next_button.setFont(QFont("Arial", 20))
+        self.next_button.setFont(QFont("Arial", 14))
         self.next_button.setFixedSize(120, 50)
         self.next_button.clicked.connect(self.next_question)
         buttons_layout.addWidget(self.next_button)
@@ -411,35 +411,69 @@ class SimpleQuestionnairePage(QWidget):
         container_layout.setAlignment(Qt.AlignLeft)  # 選項內容左對齊
         container_layout.setSpacing(12)  # 選項間距
         container_layout.setContentsMargins(0, 10, 0, 10)
+
+        is_multi_select = question.get("multi_select", False)
         
-        # 創建選項
-        self.button_group = QButtonGroup(self)
-        for option in question["options"]:
-            radio = QRadioButton(option)
-            radio.setFont(QFont("Arial", 20))
-            radio.setStyleSheet("""
-                QRadioButton {
-                    spacing: 10px;
-                    padding: 8px;
-                }
-                QRadioButton::indicator {
-                    width: 20px;
-                    height: 20px;
-                }
-                QRadioButton::indicator:unchecked {
-                    border: 2px solid #7f8c8d;
-                    border-radius: 10px;
-                    background-color: white;
-                }
-                QRadioButton::indicator:checked {
-                    border: 2px solid #3498db;
-                    border-radius: 10px;
-                    background-color: #3498db;
-                }
-            """)
-            
-            self.button_group.addButton(radio)
-            container_layout.addWidget(radio)
+        if is_multi_select:
+            #複選題
+            self.checkboxes = []
+            for option in question["options"]:
+                checkbox = QCheckBox(option)
+                checkbox.setFont(QFont("Arial", 14))
+                checkbox.setStyleSheet("""
+                    QCheckBox {
+                        spacing: 10px;
+                        padding: 8px;
+                    }
+                    QCheckBox::indicator {
+                        width: 14px;
+                        height: 14px;
+                    }
+                    QCheckBox::indicator:unchecked {
+                        border: 2px solid #7f8c8d;
+                        border-radius: 10px;
+                        background-color: white;
+                    }
+                    QCheckBox::indicator:checked {
+                        border: 2px solid #3498db;
+                        border-radius: 10px;
+                        background-color: #3498db;
+                    }
+                """)
+                
+                self.checkboxes.append(checkbox)
+                container_layout.addWidget(checkbox)
+
+        else:
+            # 單選        
+            # 創建選項
+            self.button_group = QButtonGroup(self)
+            for option in question["options"]:
+                radio = QRadioButton(option)
+                radio.setFont(QFont("Arial", 14))
+                radio.setStyleSheet("""
+                    QRadioButton {
+                        spacing: 10px;
+                        padding: 8px;
+                    }
+                    QRadioButton::indicator {
+                        width: 14px;
+                        height: 14px;
+                    }
+                    QRadioButton::indicator:unchecked {
+                        border: 2px solid #7f8c8d;
+                        border-radius: 10px;
+                        background-color: white;
+                    }
+                    QRadioButton::indicator:checked {
+                        border: 2px solid #3498db;
+                        border-radius: 10px;
+                        background-color: #3498db;
+                    }
+                """)
+                
+                self.button_group.addButton(radio)
+                container_layout.addWidget(radio)
         
         # 將整個選項容器居中放置
         self.options_layout.setAlignment(Qt.AlignCenter)
@@ -456,20 +490,41 @@ class SimpleQuestionnairePage(QWidget):
             self.show_current_question()
     
     def next_question(self):
-        # 檢查選擇
-        selected = self.button_group.checkedButton()
-        if not selected:
-            QMessageBox.warning(self, "未選擇", "請選擇一個選項")
-            return
-        
         # 保存結果
         question = self.questions[self.current_index]
-        result = {
-            "question_id": f"q{self.current_index + 1}",
-            "question": question["question"],
-            "answer": selected.text(),
-            "score": question["options"].index(selected.text()) + 1
-        }
+        is_multi_select = question.get("multi_select", False)
+
+        if is_multi_select:
+            #複選
+            selected_options = []
+            for checkbox in self.checkboxes:
+                if checkbox.isChecked():
+                    selected_options.append(checkbox.text())
+            if not selected_options:
+                QMessageBox.warning(selfm, "未選擇", "請至少選擇一個選項")
+                return
+            result = {
+                "question_id": f"q{self.current_index + 1}",
+                "question": question["question"],
+                "answer": "; ".join(selected_options),
+                "score": len(selected_options)
+            }  
+    
+        else:
+            #單選    
+            # 檢查選擇
+            selected = self.button_group.checkedButton()
+            if not selected:
+                QMessageBox.warning(self, "未選擇", "請選擇一個選項")
+                return
+            
+
+            result = {
+                "question_id": f"q{self.current_index + 1}",
+                "question": question["question"],
+                "answer": selected.text(),
+                "score": question["options"].index(selected.text()) + 1
+            }
         
         # 更新結果
         if self.current_index < len(self.results):

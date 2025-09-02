@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=EQ音樂效果實驗
+Comment=啟動EQ音樂效果實驗程式
+Exec=gnome-terminal -- bash -c "cd './armo_eq_exp1' && echo '🎵 啟動EQ音樂實驗...' && python3 armo_eq.py; echo ''; echo '程式結束，按Enter關閉...'; read"
+Icon=audio-headphones
+Terminal=true
+Categories=Education;
+StartupNotify=true

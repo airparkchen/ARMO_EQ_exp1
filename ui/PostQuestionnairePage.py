@@ -43,12 +43,12 @@ class PostQuestionnairePage(QWidget):
     
     def init_ui(self):
         layout = QVBoxLayout(self)
-        layout.setSpacing(30)
+        layout.setSpacing(5)
         layout.setContentsMargins(60, 60, 60, 60)
         
         # 標題
         self.title_label = QLabel(self.title)
-        self.title_label.setFont(QFont("Arial", 28))
+        self.title_label.setFont(QFont("Arial", 22))
         self.title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.title_label)
         
@@ -58,7 +58,7 @@ class PostQuestionnairePage(QWidget):
         
         # 問題區域
         self.question_label = QLabel()
-        self.question_label.setFont(QFont("Arial", 24))
+        self.question_label.setFont(QFont("Arial", 20))
         self.question_label.setAlignment(Qt.AlignCenter)
         self.question_label.setWordWrap(True)
         layout.addWidget(self.question_label)
@@ -70,16 +70,16 @@ class PostQuestionnairePage(QWidget):
         # 按鈕區域
         buttons_layout = QHBoxLayout()
         buttons_layout.setAlignment(Qt.AlignCenter)
-        buttons_layout.setSpacing(50)
+        buttons_layout.setSpacing(10)
         
         self.prev_button = QPushButton("上一題")
-        self.prev_button.setFont(QFont("Arial", 20))
+        self.prev_button.setFont(QFont("Arial", 14))
         self.prev_button.setFixedSize(120, 50)
         self.prev_button.clicked.connect(self.prev_question)
         buttons_layout.addWidget(self.prev_button)
         
         self.next_button = QPushButton("下一題")
-        self.next_button.setFont(QFont("Arial", 20))
+        self.next_button.setFont(QFont("Arial", 14))
         self.next_button.setFixedSize(120, 50)
         self.next_button.clicked.connect(self.next_question)
         buttons_layout.addWidget(self.next_button)
@@ -103,9 +103,9 @@ class PostQuestionnairePage(QWidget):
         
         # 標題
         music_title = QLabel("🎵 需重新聆聽音樂片段來協助回答，請點擊下方按鈕：")
-        music_title.setFont(QFont("Arial", 20, QFont.Bold))
+        music_title.setFont(QFont("Arial", 14, QFont.Bold))
         music_title.setAlignment(Qt.AlignCenter)
-        music_title.setStyleSheet("color: #2c3e50; margin: 8px;")
+        music_title.setStyleSheet("color: #2c3e50; margin: 6px;")
         music_layout.addWidget(music_title)
         
         # # 說明文字
@@ -119,13 +119,13 @@ class PostQuestionnairePage(QWidget):
         # 按鈕區域
         button_layout = QHBoxLayout()
         button_layout.setAlignment(Qt.AlignCenter)
-        button_layout.setSpacing(40)
+        button_layout.setSpacing(10)
         
         # A段音樂按鈕
         if self.music_a_path:
             self.play_a_button = QPushButton("🎵 播放 A 段音樂")
-            self.play_a_button.setFont(QFont("Arial", 16, QFont.Bold))
-            self.play_a_button.setFixedSize(200, 60)
+            self.play_a_button.setFont(QFont("Arial", 14, QFont.Bold))
+            self.play_a_button.setFixedSize(180, 35)
             self.play_a_button.setStyleSheet("""
                 QPushButton {
                     background-color: #3498db;
@@ -146,8 +146,8 @@ class PostQuestionnairePage(QWidget):
         
         # 停止按鈕 (移到中間位置)
         self.stop_button = QPushButton("⏹ 停止播放")
-        self.stop_button.setFont(QFont("Arial", 14))
-        self.stop_button.setFixedSize(140, 45)
+        self.stop_button.setFont(QFont("Arial", 12))
+        self.stop_button.setFixedSize(140, 30)
         self.stop_button.setStyleSheet("""
             QPushButton {
                 background-color: #7f8c8d;
@@ -168,8 +168,8 @@ class PostQuestionnairePage(QWidget):
         # B段音樂按鈕
         if self.music_b_path:
             self.play_b_button = QPushButton("🎵 播放 B 段音樂")
-            self.play_b_button.setFont(QFont("Arial", 16, QFont.Bold))
-            self.play_b_button.setFixedSize(200, 60)
+            self.play_b_button.setFont(QFont("Arial", 14, QFont.Bold))
+            self.play_b_button.setFixedSize(200, 35)
             self.play_b_button.setStyleSheet("""
                 QPushButton {
                     background-color: #e74c3c;
@@ -193,7 +193,7 @@ class PostQuestionnairePage(QWidget):
         # 第二排按鈕區域
         control_layout = QHBoxLayout()
         control_layout.setAlignment(Qt.AlignCenter)
-        control_layout.setSpacing(30)
+        control_layout.setSpacing(5)
         
         # 除錯模式跳過按鈕
         # if self.debug_mode:
@@ -218,7 +218,7 @@ class PostQuestionnairePage(QWidget):
         
         # 播放狀態顯示
         self.status_label = QLabel("♪ 狀態：待機中")
-        self.status_label.setFont(QFont("Arial", 16, QFont.Bold))
+        self.status_label.setFont(QFont("Arial", 14, QFont.Bold))
         self.status_label.setAlignment(Qt.AlignCenter)
         self.status_label.setStyleSheet("""
             color: #2c3e50; 
@@ -373,14 +373,14 @@ class PostQuestionnairePage(QWidget):
         options_container.setFixedWidth(600)  # 固定寬度
         container_layout = QVBoxLayout(options_container)
         container_layout.setAlignment(Qt.AlignLeft)  # 選項內容左對齊
-        container_layout.setSpacing(15)  # 選項間距
+        container_layout.setSpacing(5)  # 選項間距
         container_layout.setContentsMargins(0, 10, 0, 10)
         
         # 創建選項
         self.button_group = QButtonGroup(self)
         for option in question["options"]:
             radio = QRadioButton(option)
-            radio.setFont(QFont("Arial", 20))
+            radio.setFont(QFont("Arial", 14))
             radio.setStyleSheet("""
                 QRadioButton {
                     spacing: 12px;
