@@ -1,0 +1,64 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Nature",
+      "code": "NA",
+      "display_name": "自然音樂 (Nature)",
+      "songs": [
+        {"id": "001", "filename": "NA001"},
+        {"id": "002", "filename": "NA002"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Ambient",
+      "code": "AM",
+      "display_name": "氛圍音樂 (Ambient)",
+      "songs": [
+        {"id": "001", "filename": "AM001"},
+        {"id": "002", "filename": "AM002"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "New-Age",
+      "code": "NEA",
+      "display_name": "新世紀音樂 (New-Age)",
+      "songs": [
+        {"id": "001", "filename": "NEA001"},
+        {"id": "002", "filename": "NEA002"}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Instrumental",
+      "code": "IN",
+      "display_name": "器樂音樂 (Instrumental)",
+      "songs": [
+        {"id": "001", "filename": "IN001"},
+        {"id": "002", "filename": "IN002"}
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Lo-fi",
+      "code": "LO",
+      "display_name": "Lo-fi 音樂",
+      "songs": [
+        {"id": "001", "filename": "LO001"},
+        {"id": "002", "filename": "LO002"}
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Therapeutic",
+      "code": "TH",
+      "display_name": "療癒音樂 (Therapeutic)",
+      "songs": [
+        {"id": "001", "filename": "TH001"},
+        {"id": "002", "filename": "TH002"}
+      ]
+    }
+  ]
+}
