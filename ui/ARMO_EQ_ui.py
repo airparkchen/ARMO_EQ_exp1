@@ -173,9 +173,9 @@ class MusicSequenceGenerator:
         
         # 確定前綴
         if music_type == MusicType.ORIGINAL:
-            prefix = f"{folder}_OM_post"
+            prefix = f"{folder}_post_OM"
         elif music_type == MusicType.EQ_ENHANCED:
-            prefix = f"{folder}_EQ_post"
+            prefix = f"{folder}_post_EQ"
         else:
             return None
         
