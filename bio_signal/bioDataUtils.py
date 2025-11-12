@@ -31,10 +31,16 @@ server_timestamp_start = None
 server_sequence_counter = 0
 timestamp_lock = threading.Lock()
 
-# 數據緩衝隊列用於排序
+# 數據緩衝佇列用於排序
 data_buffer_queue = queue.PriorityQueue()
 buffer_processing_thread = None
 buffer_lock = threading.Lock()
+
+# 廣播發現機制相關變數
+broadcast_thread = None
+broadcast_flag = False
+broadcast_port = 9999  # 廣播專用端口
+tcp_port = 8000  # TCP服務端口
 
 # 原有全局變量
 plot_window_open = False
@@ -89,6 +95,89 @@ class BioSignals(QObject):
 
 bio_signals = BioSignals()
 
+def get_local_ip():
+    """取得本機在當前網路中的IP地址"""
+    try:
+        # 建立一個暫時的socket連線來判斷本機IP
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+        return local_ip
+    except Exception as e:
+        print(f"無法取得本機IP: {e}")
+        return "127.0.0.1"
+
+def start_broadcast_service():
+    """啟動UDP廣播服務"""
+    global broadcast_thread, broadcast_flag
+    
+    if broadcast_thread and broadcast_thread.is_alive():
+        print("廣播服務已在運行中")
+        return
+    
+    broadcast_flag = True
+    broadcast_thread = threading.Thread(target=broadcast_worker, daemon=True)
+    broadcast_thread.start()
+    print("廣播服務已啟動")
+
+def stop_broadcast_service():
+    """停止UDP廣播服務"""
+    global broadcast_flag
+    broadcast_flag = False
+    print("廣播服務已停止")
+
+def broadcast_worker():
+    """廣播工作線程"""
+    global broadcast_flag, tcp_port, is_client_connected
+    
+    # 建立UDP socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    
+    try:
+        while broadcast_flag and startFlag:
+            try:
+                # 準備廣播數據
+                local_ip = get_local_ip()
+                broadcast_data = {
+                    "service": "bio_signal_server",
+                    "ip": local_ip,
+                    "tcp_port": tcp_port,
+                    "timestamp": time.time(),
+                    "status": "online"
+                }
+                
+                message = json.dumps(broadcast_data).encode('utf-8')
+                
+                # 發送廣播到255.255.255.255
+                sock.sendto(message, ('255.255.255.255', broadcast_port))
+                
+                # 也發送到本地網段廣播地址
+                ip_parts = local_ip.split('.')
+                if len(ip_parts) == 4:
+                    broadcast_ip = f"{ip_parts[0]}.{ip_parts[1]}.{ip_parts[2]}.255"
+                    sock.sendto(message, (broadcast_ip, broadcast_port))
+                
+                # 只有在沒有客戶端連線時才顯示廣播資訊
+                if not is_client_connected:
+                    print(f"廣播伺服器資訊: {local_ip}:{tcp_port}")
+                
+            except Exception as e:
+                print(f"廣播發送錯誤: {e}")
+            
+            # 每3秒廣播一次
+            for _ in range(30):  # 分成30個0.1秒，方便快速停止
+                if not broadcast_flag or not startFlag:
+                    break
+                sleep(0.1)
+                
+    except Exception as e:
+        print(f"廣播服務錯誤: {e}")
+    finally:
+        sock.close()
+        print("廣播服務已關閉")
+
 def generate_server_timestamp():
     """伺服器端生成實際接收時間戳"""
     current_time = time.time()
@@ -127,7 +216,7 @@ class DataPoint:
         return self.client_time_float < other.client_time_float
 
 def start_buffer_processing():
-    """啟動緩衝區處理線程"""
+    """啟動緩衝處理線程"""
     global buffer_processing_thread
     
     def process_buffer():
@@ -135,11 +224,11 @@ def start_buffer_processing():
         
         while startFlag:
             try:
-                # 使用較短間隔處理緩衝區，確保延遲封包能正確排序
+                # 使用較短間隔處理緩衝，確保延遲封包能正確排序
                 current_time = time.time()
                 if current_time - last_process_time >= 0.3:  # 300ms間隔給予足夠時間讓延遲封包到達
                     
-                    # 從優先隊列中取出數據點
+                    # 從優先佇列中取出數據點
                     temp_buffer = []
                     while not data_buffer_queue.empty():
                         try:
@@ -160,12 +249,12 @@ def start_buffer_processing():
                 sleep(0.05)  # 減少CPU使用率
                 
             except Exception as e:
-                print(f"緩衝區處理錯誤: {e}")
+                print(f"緩衝處理錯誤: {e}")
                 sleep(1)
     
     buffer_processing_thread = threading.Thread(target=process_buffer, daemon=True)
     buffer_processing_thread.start()
-    print("緩衝區處理線程已啟動")
+    print("緩衝處理線程已啟動")
 
 def process_sorted_data(data_point):
     """處理已排序的數據點 - 使用客戶端原始時間戳"""
@@ -180,7 +269,7 @@ def process_sorted_data(data_point):
     timestamp = data_point.original_timestamp if data_point.original_timestamp else data_point.server_timestamp
     
     with data_lock:
-        # 根據信號類型存儲數據
+        # 根據信號類型儲存數據
         if signal_type == "GSR":
             gsr_data.append(value)
             if fgsr:
@@ -284,7 +373,10 @@ def setFileName(fileName):
 def read_wireless(host="0.0.0.0", port=8000):
     global client_connection, latest_gsr, latest_hr, latest_skt, latest_ppi, latest_act
     global latest_imux, latest_imuy, latest_imuz, latest_ppgraw
-    global last_output_time, last_data_time, is_client_connected
+    global last_output_time, last_data_time, is_client_connected, tcp_port
+    
+    # 更新TCP端口變數
+    tcp_port = port
 
     buffer = ""
     while startFlag:
@@ -293,10 +385,11 @@ def read_wireless(host="0.0.0.0", port=8000):
             server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             server_socket.bind((host, port))
             server_socket.listen(1)
-            print(f"Server listening on {host}:{port}...")
+            print(f"TCP伺服器監聽於 {host}:{port}...")
+            print(f"本機IP: {get_local_ip()}")
 
             conn, addr = server_socket.accept()
-            print(f"Connected by {addr}")
+            print(f"客戶端已連接: {addr}")
 
             with connection_lock:
                 client_connection = conn
@@ -308,7 +401,7 @@ def read_wireless(host="0.0.0.0", port=8000):
                     conn.settimeout(1.0)
                     data = conn.recv(1024)
                     if not data:
-                        print("Client disconnected. Waiting for reconnection...")
+                        print("客戶端斷線，等待重新連接...")
                         bio_signals.disconnect_signal.emit("Client disconnected gracefully")
                         break
 
@@ -362,14 +455,14 @@ def read_wireless(host="0.0.0.0", port=8000):
                                 process_data_with_server_timestamp(parsed_data)
 
                         except json.JSONDecodeError:
-                            print(f"Invalid JSON format: {message}. Skipping this message.")
+                            print(f"無效的JSON格式: {message}. 跳過此訊息.")
                     if is_client_connected and time.time() - last_data_time > SIGNAL_TIMEOUT:
                         bio_signals.signal_lost_signal.emit("No physiological signals received for too long")
                 except socket.timeout:
                     if is_client_connected and time.time() - last_data_time > SIGNAL_TIMEOUT:
                         bio_signals.signal_lost_signal.emit("No physiological signals received for too long")
                 except Exception as e:
-                    print(f"Error in communication: {e}")
+                    print(f"通訊錯誤: {e}")
                     bio_signals.disconnect_signal.emit(f"Connection error: {e}")
                     break
 
@@ -377,9 +470,9 @@ def read_wireless(host="0.0.0.0", port=8000):
                 client_connection = None
                 is_client_connected = False
             conn.close()
-            print("Connection closed. Restarting server...")
+            print("連線已關閉，重新啟動伺服器...")
         except Exception as e:
-            print(f"Error in server setup: {e}")
+            print(f"伺服器設定錯誤: {e}")
             bio_signals.disconnect_signal.emit(f"Server setup error: {e}")
             sleep(1)
         finally:
@@ -399,7 +492,7 @@ def process_data_with_server_timestamp(parsed_data):
                 original_timestamp = parsed_data.get(f"{signal_type}_Timestamp", "")
                 server_timestamp = generate_server_timestamp()
                 
-                # 創建數據點並加入緩衝隊列
+                # 創建數據點並加入緩衝佇列
                 data_point = DataPoint(
                     signal_type=signal_type,
                     value=value,
@@ -426,8 +519,11 @@ def startSerial(host="0.0.0.0", port=8000):
         server_timestamp_start = None
         server_sequence_counter = 0
     
-    # 啟動緩衝區處理
+    # 啟動緩衝處理
     start_buffer_processing()
+    
+    # 啟動廣播服務
+    start_broadcast_service()
     
     startFlag = True
     thread = threading.Thread(target=read_wireless, args=(host, port))
@@ -480,13 +576,24 @@ def stopSerial():
     global startFlag
     print("[stopSerial]")
     startFlag = False
+    # 停止廣播服務
+    stop_broadcast_service()
     closeFile()
 
 def get_timestamp_stats():
-    """獲取時間戳生成統計信息"""
+    """取得時間戳生成統計信息"""
     with timestamp_lock:
         return {
             "sequence_counter": server_sequence_counter,
             "start_time": server_timestamp_start,
             "current_time": time.time()
         }
+
+def get_broadcast_info():
+    """取得廣播服務資訊"""
+    return {
+        "broadcast_port": broadcast_port,
+        "tcp_port": tcp_port,
+        "local_ip": get_local_ip(),
+        "broadcast_active": broadcast_flag
+    }

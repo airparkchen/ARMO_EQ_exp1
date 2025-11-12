@@ -313,6 +313,8 @@ class NewExperimentWindowWithBio(QMainWindow):
                 host=self.config.bio_signal_host,
                 port=self.config.bio_signal_port
             )
+            # ✅ 開始寫入數據
+            self.bio_signal_manager.start_writing()
 
             print(f"[生理訊號] 已初始化，等待連線於 {self.config.bio_signal_host}:{self.config.bio_signal_port}")
 
