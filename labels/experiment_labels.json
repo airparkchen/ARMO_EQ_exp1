@@ -1,0 +1,47 @@
+[
+  {
+    "page": 0,
+    "label": "init",
+    "description": "實驗初始化"
+  },
+  {
+    "page": 1,
+    "label": "baseline",
+    "description": "Baseline 階段（3分鐘）"
+  },
+  {
+    "page": 2,
+    "label": "music1",
+    "description": "音樂1播放（5分鐘）"
+  },
+  {
+    "page": 3,
+    "label": "questionnaire1",
+    "description": "問卷1填寫"
+  },
+  {
+    "page": 4,
+    "label": "interval1",
+    "description": "間隔休息1（至少3分鐘）"
+  },
+  {
+    "page": 5,
+    "label": "music2",
+    "description": "音樂2播放（5分鐘）"
+  },
+  {
+    "page": 6,
+    "label": "questionnaire2",
+    "description": "問卷2填寫"
+  },
+  {
+    "page": 7,
+    "label": "interval2",
+    "description": "間隔休息2（至少3分鐘）"
+  },
+  {
+    "page": 8,
+    "label": "complete",
+    "description": "實驗完成"
+  }
+]

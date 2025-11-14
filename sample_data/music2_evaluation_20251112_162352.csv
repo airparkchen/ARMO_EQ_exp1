@@ -1,0 +1,4 @@
+question_id,question,dimension,answer,score,timestamp
+q1,你現在的心情感覺怎麼樣？,valence,有點愉快,4,20251112_162352
+q2,你現在的精神感覺怎麼樣？,arousal,有點緊繃,4,20251112_162352
+q3,你覺得這首歌曲的放鬆程度,relaxation,有點放鬆,4,20251112_162352

@@ -1,0 +1,20 @@
+{
+  "subject_id": 2,
+  "session_number": 1,
+  "group": "B",
+  "category": "Nature",
+  "category_code": "NA",
+  "song_order": [
+    "002",
+    "001"
+  ],
+  "music_files": [
+    "NA002.wav",
+    "NA001.wav"
+  ],
+  "start_time": "2025-11-12 16:20:30",
+  "debug_mode": true,
+  "bio_signal_enabled": true,
+  "bio_signal_host": "0.0.0.0",
+  "bio_signal_port": 8000
+}
