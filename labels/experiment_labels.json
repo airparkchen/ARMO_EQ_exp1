@@ -41,6 +41,21 @@
   },
   {
     "page": 8,
+    "label": "music3",
+    "description": "音樂3播放（5分鐘）"
+  },
+  {
+    "page": 9,
+    "label": "questionnaire3",
+    "description": "問卷3填寫"
+  },
+  {
+    "page": 10,
+    "label": "interval3",
+    "description": "間隔休息3（至少3分鐘）"
+  },
+  {
+    "page": 11,
     "label": "complete",
     "description": "實驗完成"
   }

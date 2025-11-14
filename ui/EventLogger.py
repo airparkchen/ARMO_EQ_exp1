@@ -18,6 +18,9 @@ class Phase:
     MUSIC2 = "music2"
     QUESTIONNAIRE2 = "questionnaire2"
     INTERVAL2 = "interval2"
+    MUSIC3 = "music3"
+    QUESTIONNAIRE3 = "questionnaire3"
+    INTERVAL3 = "interval3"
     COMPLETE = "complete"
 
 class EventLogger:

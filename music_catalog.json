@@ -7,7 +7,8 @@
       "display_name": "自然音樂 (Nature)",
       "songs": [
         {"id": "001", "filename": "NA001"},
-        {"id": "002", "filename": "NA002"}
+        {"id": "002", "filename": "NA002"},
+        {"id": "003", "filename": "NA003"}
       ]
     },
     {
@@ -17,7 +18,8 @@
       "display_name": "氛圍音樂 (Ambient)",
       "songs": [
         {"id": "001", "filename": "AM001"},
-        {"id": "002", "filename": "AM002"}
+        {"id": "002", "filename": "AM002"},
+        {"id": "003", "filename": "AM003"}
       ]
     },
     {
@@ -27,7 +29,8 @@
       "display_name": "新世紀音樂 (New-Age)",
       "songs": [
         {"id": "001", "filename": "NEA001"},
-        {"id": "002", "filename": "NEA002"}
+        {"id": "002", "filename": "NEA002"},
+        {"id": "003", "filename": "NEA003"}
       ]
     },
     {
@@ -37,7 +40,8 @@
       "display_name": "器樂音樂 (Instrumental)",
       "songs": [
         {"id": "001", "filename": "IN001"},
-        {"id": "002", "filename": "IN002"}
+        {"id": "002", "filename": "IN002"},
+        {"id": "003", "filename": "IN003"}
       ]
     },
     {
@@ -47,7 +51,8 @@
       "display_name": "Lo-fi 音樂",
       "songs": [
         {"id": "001", "filename": "LO001"},
-        {"id": "002", "filename": "LO002"}
+        {"id": "002", "filename": "LO002"},
+        {"id": "003", "filename": "LO003"}
       ]
     },
     {
@@ -57,7 +62,8 @@
       "display_name": "療癒音樂 (Therapeutic)",
       "songs": [
         {"id": "001", "filename": "TH001"},
-        {"id": "002", "filename": "TH002"}
+        {"id": "002", "filename": "TH002"},
+        {"id": "003", "filename": "TH003"}
       ]
     }
   ]

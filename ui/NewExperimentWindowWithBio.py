@@ -2,12 +2,13 @@
 """
 新實驗主控制器 - 整合生理訊號記錄
 流程：設備配戴 → Baseline(3分鐘) → 音樂1(5分鐘) → 問卷1 → 間隔1(至少3分鐘)
-     → 音樂2(5分鐘) → 問卷2 → 間隔2(至少3分鐘) → 完成
+     → 音樂2(5分鐘) → 問卷2 → 間隔2(至少3分鐘) → 音樂3(5分鐘) → 問卷3 → 間隔3(至少3分鐘) → 完成
 
 整合功能：
 - 在實驗開始時自動啟動生理訊號記錄
 - 在每個階段切換時自動標記 label
 - 實驗結束時自動停止記錄
+- 支援6組Latin Square設計 (A-F組，平衡3首歌曲順序)
 """
 import os
 import json
@@ -147,7 +148,7 @@ class NewExperimentWindowWithBio(QMainWindow):
         # 說明
         info = QLabel(
             "請設定實驗參數\n"
-            "每次實驗將播放2首音樂，總時長約15-20分鐘"
+            "每次實驗將播放3首音樂，總時長約25-30分鐘"
         )
         info.setFont(QFont("Arial", 16))
         info.setAlignment(Qt.AlignCenter)
@@ -203,26 +204,51 @@ class NewExperimentWindowWithBio(QMainWindow):
         category_layout.addStretch()
         params_layout.addLayout(category_layout)
 
-        # 組別選擇
-        group_layout = QHBoxLayout()
-        group_label = QLabel("組別:")
+        # 組別選擇（Latin Square Design for 3 songs）
+        group_layout = QVBoxLayout()
+        group_label = QLabel("組別 (Latin Square):")
         group_label.setFont(QFont("Arial", 16))
-        group_label.setFixedWidth(200)
+        group_layout.addWidget(group_label)
 
         self.group_button_group = QButtonGroup()
-        self.group_a_radio = QRadioButton("A組 (001→002)")
-        self.group_b_radio = QRadioButton("B組 (002→001)")
-        self.group_a_radio.setFont(QFont("Arial", 14))
-        self.group_b_radio.setFont(QFont("Arial", 14))
+
+        # 第一行：A, B, C
+        group_row1 = QHBoxLayout()
+        self.group_a_radio = QRadioButton("A組 (001→002→003)")
+        self.group_b_radio = QRadioButton("B組 (001→003→002)")
+        self.group_c_radio = QRadioButton("C組 (002→001→003)")
+        self.group_a_radio.setFont(QFont("Arial", 13))
+        self.group_b_radio.setFont(QFont("Arial", 13))
+        self.group_c_radio.setFont(QFont("Arial", 13))
         self.group_a_radio.setChecked(True)
 
         self.group_button_group.addButton(self.group_a_radio)
         self.group_button_group.addButton(self.group_b_radio)
+        self.group_button_group.addButton(self.group_c_radio)
 
-        group_layout.addWidget(group_label)
-        group_layout.addWidget(self.group_a_radio)
-        group_layout.addWidget(self.group_b_radio)
-        group_layout.addStretch()
+        group_row1.addWidget(self.group_a_radio)
+        group_row1.addWidget(self.group_b_radio)
+        group_row1.addWidget(self.group_c_radio)
+        group_layout.addLayout(group_row1)
+
+        # 第二行：D, E, F
+        group_row2 = QHBoxLayout()
+        self.group_d_radio = QRadioButton("D組 (002→003→001)")
+        self.group_e_radio = QRadioButton("E組 (003→001→002)")
+        self.group_f_radio = QRadioButton("F組 (003→002→001)")
+        self.group_d_radio.setFont(QFont("Arial", 13))
+        self.group_e_radio.setFont(QFont("Arial", 13))
+        self.group_f_radio.setFont(QFont("Arial", 13))
+
+        self.group_button_group.addButton(self.group_d_radio)
+        self.group_button_group.addButton(self.group_e_radio)
+        self.group_button_group.addButton(self.group_f_radio)
+
+        group_row2.addWidget(self.group_d_radio)
+        group_row2.addWidget(self.group_e_radio)
+        group_row2.addWidget(self.group_f_radio)
+        group_layout.addLayout(group_row2)
+
         params_layout.addLayout(group_layout)
 
         # ⭐ 新增：生理訊號記錄選項
@@ -268,8 +294,21 @@ class NewExperimentWindowWithBio(QMainWindow):
         # 取得參數
         self.subject_id = int(self.subject_combo.currentText())
         self.session_number = int(self.session_combo.currentText())
-        self.group = 'A' if self.group_a_radio.isChecked() else 'B'
         self.enable_bio_signal = self.bio_checkbox.isChecked()
+
+        # 判斷組別 (A-F)
+        if self.group_a_radio.isChecked():
+            self.group = 'A'
+        elif self.group_b_radio.isChecked():
+            self.group = 'B'
+        elif self.group_c_radio.isChecked():
+            self.group = 'C'
+        elif self.group_d_radio.isChecked():
+            self.group = 'D'
+        elif self.group_e_radio.isChecked():
+            self.group = 'E'
+        else:
+            self.group = 'F'
 
         # 取得選擇的類別
         selected_index = self.category_combo.currentIndex()
@@ -277,11 +316,16 @@ class NewExperimentWindowWithBio(QMainWindow):
         self.category = selected_category['name']
         self.category_code = selected_category['code']
 
-        # 決定播放順序
-        if self.group == 'A':
-            self.song_order = ['001', '002']
-        else:
-            self.song_order = ['002', '001']
+        # 決定播放順序（Latin Square Design）
+        song_orders = {
+            'A': ['001', '002', '003'],
+            'B': ['001', '003', '002'],
+            'C': ['002', '001', '003'],
+            'D': ['002', '003', '001'],
+            'E': ['003', '001', '002'],
+            'F': ['003', '002', '001']
+        }
+        self.song_order = song_orders[self.group]
 
         # 檢查音檔是否存在
         if not self.check_music_files():
@@ -565,11 +609,71 @@ class NewExperimentWindowWithBio(QMainWindow):
     def on_interval2_complete(self):
         """間隔2完成"""
         self.event_logger.log_phase_end(Phase.INTERVAL2)
+        self.play_music_3()
+
+    def play_music_3(self):
+        """播放音樂3"""
+        self.current_page_index = 8  # music3
+        music_id = f"{self.category_code}{self.song_order[2]}"
+        self.event_logger.log_phase_start(Phase.MUSIC3, music_id)
+        self.update_bio_signal_label(self.current_page_index, "music3")
+
+        music_page = MusicPageWithTimer(
+            music_path=self.music_files[2],
+            music_title=f"{self.category} - {music_id}",
+            duration_seconds=self.config.MUSIC_DURATION,
+            next_page_callback=self.on_music3_complete,
+            debug_mode=self.debug_mode
+        )
+        self.setCentralWidget(music_page)
+
+    def on_music3_complete(self):
+        """音樂3完成"""
+        music_id = f"{self.category_code}{self.song_order[2]}"
+        self.event_logger.log_phase_end(Phase.MUSIC3, music_id)
+        self.show_questionnaire_3()
+
+    def show_questionnaire_3(self):
+        """顯示問卷3"""
+        self.current_page_index = 9  # questionnaire3
+        self.event_logger.log_phase_start(Phase.QUESTIONNAIRE3)
+        self.update_bio_signal_label(self.current_page_index, "questionnaire3")
+
+        questions = self.load_questionnaire()
+        questionnaire = SimpleQuestionnairePage(
+            questions=questions,
+            title="音樂3 評估問卷",
+            next_callback=self.on_questionnaire3_complete
+        )
+        self.setCentralWidget(questionnaire)
+
+    def on_questionnaire3_complete(self, results: List[Dict]):
+        """問卷3完成"""
+        self.event_logger.log_phase_end(Phase.QUESTIONNAIRE3)
+        self.save_questionnaire_results(results, "music3_evaluation")
+        self.start_interval_3()
+
+    def start_interval_3(self):
+        """開始間隔3"""
+        self.current_page_index = 10  # interval3
+        self.event_logger.log_phase_start(Phase.INTERVAL3)
+        self.update_bio_signal_label(self.current_page_index, "interval3")
+
+        interval_page = IntervalPage(
+            min_duration_seconds=self.config.INTERVAL_MIN_DURATION,
+            next_callback=self.on_interval3_complete,
+            debug_mode=self.debug_mode
+        )
+        self.setCentralWidget(interval_page)
+
+    def on_interval3_complete(self):
+        """間隔3完成"""
+        self.event_logger.log_phase_end(Phase.INTERVAL3)
         self.complete_experiment()
 
     def complete_experiment(self):
         """完成實驗"""
-        self.current_page_index = 8  # complete
+        self.current_page_index = 11  # complete
         self.event_logger.log_phase_start(Phase.COMPLETE)
         self.update_bio_signal_label(self.current_page_index, "complete")
 
