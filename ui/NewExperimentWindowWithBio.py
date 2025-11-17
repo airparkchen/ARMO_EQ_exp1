@@ -25,6 +25,7 @@ from PySide6.QtGui import QFont
 from ui.BaselinePage import BaselinePage
 from ui.MusicPageWithTimer import MusicPageWithTimer
 from ui.IntervalPage import IntervalPage
+from ui.InstructionPage import InstructionPage
 from ui.ARMO_EQ_ui import SimpleQuestionnairePage
 from ui.EventLogger import EventLogger, Phase
 
@@ -83,6 +84,7 @@ class NewExperimentWindowWithBio(QMainWindow):
         self.group = None
         self.category = None
         self.category_code = None
+        self.participant_name = ""  # 參與者姓名
         self.enable_bio_signal = False  # 是否啟用生理訊號記錄
 
         # 音樂資訊
@@ -262,7 +264,7 @@ class NewExperimentWindowWithBio(QMainWindow):
         self.setCentralWidget(start_widget)
 
     def on_start_experiment(self):
-        """開始實驗按鈕點擊"""
+        """開始實驗按鈕點擊 - 顯示實驗說明頁面"""
         # 取得參數
         self.subject_id = int(self.subject_combo.currentText())
         self.session_number = int(self.session_combo.currentText())
@@ -284,6 +286,26 @@ class NewExperimentWindowWithBio(QMainWindow):
         # 檢查音檔是否存在
         if not self.check_music_files():
             return
+
+        # 顯示實驗說明頁面
+        self.show_instruction_page()
+
+    def show_instruction_page(self):
+        """顯示實驗說明頁面"""
+        # 創建說明頁面
+        instruction_page = InstructionPage(
+            on_continue_callback=self.on_instruction_continue,
+            debug_mode=self.debug_mode
+        )
+
+        # 設置為中央小部件
+        self.setCentralWidget(instruction_page)
+
+    def on_instruction_continue(self, participant_name):
+        """從實驗說明頁面繼續 - 真正開始實驗"""
+        # 保存參與者姓名
+        self.participant_name = participant_name
+        print(f"[系統] 參與者姓名：{self.participant_name}")
 
         # 創建結果目錄
         self.create_result_directory()
@@ -385,6 +407,7 @@ class NewExperimentWindowWithBio(QMainWindow):
             "subject_id": self.subject_id,
             "session_number": self.session_number,
             "group": self.group,
+            "participant_name": self.participant_name,  # 參與者姓名
             "category": self.category,
             "category_code": self.category_code,
             "song_order": self.song_order,
