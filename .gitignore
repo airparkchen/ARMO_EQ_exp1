@@ -4,3 +4,6 @@
 *.flat
 test_result/
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
