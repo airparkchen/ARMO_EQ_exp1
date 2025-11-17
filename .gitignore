@@ -3,3 +3,4 @@
 *.mp3
 *.flat
 test_result/
+__pycache__/
